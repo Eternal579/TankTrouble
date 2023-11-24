@@ -4,14 +4,14 @@ from .. import setup, tools, constants as C
 
 class MainMenu:
     def __init__(self):
-        self.setup_player()
+        self.how_to_play()
         self.setup_cursor()
         self.setup_start_animation()
         self.finished = False
         self.next = 'load_screen'
 
     def setup(self, *args):
-        self.setup_player()
+        self.how_to_play()
         self.setup_cursor()
         self.setup_start_animation()
         self.finished = False
@@ -19,7 +19,7 @@ class MainMenu:
 
     def setup_start_animation(self):
         self.frame_size = 0
-        self.start_label = tools.create_label('press space to start', 32)
+        self.start_label = tools.create_textImg('press space to start', 32)
         self.display_start_label = (self.start_label, (500, 500))
 
     def update_start_animation(self, surface):
@@ -36,31 +36,33 @@ class MainMenu:
                                     (0.4*C.SCREEN_W-0.1*C.SCREEN_W*self.frame_size, 0.8*C.SCREEN_H))
         surface.blit(self.display_start_label[0], self.display_start_label[1])
 
-    def setup_player(self):
+    # 
+    def how_to_play(self):
         self.player_labels = []
         self.player_labels.append(
-            (tools.create_label('PLAYER 1', 35), (C.PLAYER1_X, C.PLAYER1_Y)))
+            (tools.create_textImg('PLAYER 1', 35), (C.PLAYER1_X, C.PLAYER1_Y)))
         self.player_labels.append(
-            (tools.create_label('WASD Q', 35), (0.15*C.SCREEN_W+C.PLAYER1_X, C.PLAYER1_Y)))
+            (tools.create_textImg('WASD Q', 35), (0.15*C.SCREEN_W+C.PLAYER1_X, C.PLAYER1_Y)))
         self.player_labels.append(
-            (tools.create_label('press Q', 35), (0.36*C.SCREEN_W+C.PLAYER1_X, C.PLAYER1_Y)))
+            (tools.create_textImg('press Q', 35), (0.36*C.SCREEN_W+C.PLAYER1_X, C.PLAYER1_Y)))
         self.player_labels.append(
-            (tools.create_label('PLAYER 2', 35), (C.PLAYER1_X, 0.1*C.SCREEN_H+C.PLAYER1_Y)))
-        self.player_labels.append((tools.create_label(
-            'IJKL U', 35), (0.15*C.SCREEN_W+C.PLAYER1_X, 0.1*C.SCREEN_H+C.PLAYER1_Y)))
-        self.player_labels.append((tools.create_label(
-            'press U', 35), (0.36*C.SCREEN_W+C.PLAYER1_X, 0.1*C.SCREEN_H+C.PLAYER1_Y)))
+            (tools.create_textImg('PLAYER 2', 35), (C.PLAYER1_X, 0.1*C.SCREEN_H+C.PLAYER1_Y)))
         self.player_labels.append(
-            (tools.create_label('PLAYER 3', 35), (C.PLAYER1_X, 0.2*C.SCREEN_H+C.PLAYER1_Y)))
+            (tools.create_textImg('IJKL U', 35), (0.15*C.SCREEN_W+C.PLAYER1_X, 0.1*C.SCREEN_H+C.PLAYER1_Y)))
         self.player_labels.append(
-            (tools.create_label('DIRECT DEL', 35), (0.15*C.SCREEN_W+C.PLAYER1_X, 0.2*C.SCREEN_H+C.PLAYER1_Y)))
+            (tools.create_textImg('press U', 35), (0.36*C.SCREEN_W+C.PLAYER1_X, 0.1*C.SCREEN_H+C.PLAYER1_Y)))
         self.player_labels.append(
-            (tools.create_label('press DELETE', 35), (0.36*C.SCREEN_W+C.PLAYER1_X, 0.2*C.SCREEN_H+C.PLAYER1_Y)))
+            (tools.create_textImg('PLAYER 3', 35), (C.PLAYER1_X, 0.2*C.SCREEN_H+C.PLAYER1_Y)))
+        self.player_labels.append(
+            (tools.create_textImg('DIRECT DEL', 35), (0.15*C.SCREEN_W+C.PLAYER1_X, 0.2*C.SCREEN_H+C.PLAYER1_Y)))
+        self.player_labels.append(
+            (tools.create_textImg('press DELETE', 35), (0.36*C.SCREEN_W+C.PLAYER1_X, 0.2*C.SCREEN_H+C.PLAYER1_Y)))
 
     def setup_cursor(self):
         self.cursor_p1 = pygame.sprite.Sprite()
-        self.cursor_p1.image = tools.get_image(
-            setup.GRAPHICS['red'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.WHITE, C.CURSOR_MULTI)
+
+        self.cursor_p1.image = tools.create_image(
+            setup.GRAPHICS['red'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.CURSOR_MULTI)
         rect = self.cursor_p1.image.get_rect()
         rect.x, rect.y = (0.57*C.SCREEN_W+C.PLAYER1_X -
                           rect.w/2, C.PLAYER1_Y-rect.h/2)
@@ -68,8 +70,8 @@ class MainMenu:
         self.cursor_p1.state = False
 
         self.cursor_p2 = pygame.sprite.Sprite()
-        self.cursor_p2.image = tools.get_image(
-            setup.GRAPHICS['green'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.WHITE, C.CURSOR_MULTI)
+        self.cursor_p2.image = tools.create_image(
+            setup.GRAPHICS['green'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.CURSOR_MULTI)
         rect = self.cursor_p2.image.get_rect()
         rect.x, rect.y = (0.57*C.SCREEN_W+C.PLAYER1_X-rect.w/2,
                           0.1*C.SCREEN_H+C.PLAYER1_Y-rect.h/2)
@@ -77,8 +79,8 @@ class MainMenu:
         self.cursor_p2.state = False
 
         self.cursor_p3 = pygame.sprite.Sprite()
-        self.cursor_p3.image = tools.get_image(
-            setup.GRAPHICS['blue'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.WHITE, C.CURSOR_MULTI)
+        self.cursor_p3.image = tools.create_image(
+            setup.GRAPHICS['blue'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.CURSOR_MULTI)
         rect = self.cursor_p3.image.get_rect()
         rect.x, rect.y = (0.57*C.SCREEN_W+C.PLAYER1_X-rect.w/2,
                           0.2*C.SCREEN_H+C.PLAYER1_Y-rect.h/2)
@@ -118,8 +120,8 @@ class MainMenu:
 
     def update(self, surface, keys):
         surface.fill(C.SCREEN_COLOR)
-        caption = tools.get_image(
-            setup.GRAPHICS['caption'], 0, 0, 152, 14, C.WHITE, 6)
+        caption = tools.create_image(
+            setup.GRAPHICS['caption'], 0, 0, 152, 14, 6)
         rect = caption.get_rect()
         rect.x, rect.y = 175, 110
         surface.blit(caption, rect)

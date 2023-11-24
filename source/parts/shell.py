@@ -23,8 +23,8 @@ class Shell(pygame.sprite.Sprite):
         self.load_image()
 
     def load_image(self):
-        self.image = tools.get_image(
-            setup.GRAPHICS['round'], 0, 0, C.ROUND_PX, C.ROUND_PY, C.WHITE, self.size)
+        self.image = tools.create_image(
+            setup.GRAPHICS['round'], 0, 0, C.ROUND_PX, C.ROUND_PY, self.size)
         self.rect = self.image.get_rect()
         self.rect.center = (self.x/C.MOTION_CALC_SCALE,
                             self.y/C.MOTION_CALC_SCALE)

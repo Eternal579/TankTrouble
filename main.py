@@ -6,7 +6,7 @@ def main():
     state_dict = {
         'main_menu': main_menu.MainMenu(),
         'load_screen': load_screen.LoadScreen(),
-        #'arena': arena.Arena()
+        'arena': arena.Arena()
     }
     game = tools.Game(state_dict, 'main_menu')
     game.run()

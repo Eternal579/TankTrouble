@@ -59,20 +59,20 @@ class player(pygame.sprite.Sprite):
 
     def load_material(self):
         if self.name == 1:
-            self.image = tools.get_image(
-                setup.GRAPHICS['red'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.WHITE, C.PLAYER_MULTI)
-            self.fire_image = tools.get_image(
-                setup.GRAPHICS['red_s'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.WHITE, C.PLAYER_MULTI)
+            self.image = tools.create_image(
+                setup.GRAPHICS['red'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.PLAYER_MULTI)
+            self.fire_image = tools.create_image(
+                setup.GRAPHICS['red_s'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.PLAYER_MULTI)
         elif self.name == 2:
-            self.image = tools.get_image(
-                setup.GRAPHICS['green'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.WHITE, C.PLAYER_MULTI)
-            self.fire_image = tools.get_image(
-                setup.GRAPHICS['green_s'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.WHITE, C.PLAYER_MULTI)
+            self.image = tools.create_image(
+                setup.GRAPHICS['green'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.PLAYER_MULTI)
+            self.fire_image = tools.create_image(
+                setup.GRAPHICS['green_s'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.PLAYER_MULTI)
         elif self.name == 3:
-            self.image = tools.get_image(
-                setup.GRAPHICS['blue'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.WHITE, C.PLAYER_MULTI)
-            self.fire_image = tools.get_image(
-                setup.GRAPHICS['blue_s'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.WHITE, C.PLAYER_MULTI)
+            self.image = tools.create_image(
+                setup.GRAPHICS['blue'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.PLAYER_MULTI)
+            self.fire_image = tools.create_image(
+                setup.GRAPHICS['blue_s'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.PLAYER_MULTI)
         self.display_image = self.image
 
     def update_position(self, keys):

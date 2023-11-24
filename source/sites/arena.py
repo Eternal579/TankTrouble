@@ -84,25 +84,25 @@ class Arena:
             self.finished = True
 
     def draw_info(self, surface):
-        surface.blit(tools.create_label('ESC  /  P', 28),
+        surface.blit(tools.create_textImg('ESC  /  P', 28),
                      (C.SCREEN_W*0.11, C.SCREEN_H*0.9))
         if self.pause:
-            surface.blit(tools.create_label('pause...', 28),
+            surface.blit(tools.create_textImg('pause...', 28),
                          (C.SCREEN_W*0.215, C.SCREEN_H*0.9))
         if self.score[0] != -1:
-            surface.blit(tools.create_label(str(self.score[0]), 32),
+            surface.blit(tools.create_textImg(str(self.score[0]), 32),
                          (C.SCREEN_W*0.46, C.SCREEN_H*0.9))
-            surface.blit(tools.create_label('PLAYER1', 32),
+            surface.blit(tools.create_textImg('PLAYER1', 32),
                          (C.SCREEN_W*0.33, C.SCREEN_H*0.9))
         if self.score[1] != -1:
-            surface.blit(tools.create_label(str(self.score[1]), 32),
+            surface.blit(tools.create_textImg(str(self.score[1]), 32),
                          (C.SCREEN_W*0.66, C.SCREEN_H*0.9))
-            surface.blit(tools.create_label('PLAYER2', 32),
+            surface.blit(tools.create_textImg('PLAYER2', 32),
                          (C.SCREEN_W*0.53, C.SCREEN_H*0.9))
         if self.score[2] != -1:
-            surface.blit(tools.create_label(str(self.score[2]), 32),
+            surface.blit(tools.create_textImg(str(self.score[2]), 32),
                          (C.SCREEN_W*0.86, C.SCREEN_H*0.9))
-            surface.blit(tools.create_label('PLAYER3', 32),
+            surface.blit(tools.create_textImg('PLAYER3', 32),
                          (C.SCREEN_W*0.73, C.SCREEN_H*0.9))
 
     def update_states(self, keys):
