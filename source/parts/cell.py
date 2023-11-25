@@ -19,6 +19,7 @@ class Wall(pygame.sprite.Sprite):
 
 
 class Cell:
+    # x和y表示此cell的位置，walls_sign表示这个cell在上下左右的边界否
     def __init__(self, x, y, walls_sign):
         self.walls_sign = walls_sign
         self.setup_color(x, y)
@@ -26,21 +27,35 @@ class Cell:
 
     def setup_walls(self):
         self.walls = pygame.sprite.Group()
+
+        # 如果单元格的 walls_sign 属性包含 C.TOP 标志
+        # 创建一个 Wall 对象并将其添加到 walls 组中，位于单元格的顶部
         if self.walls_sign & C.TOP:
             self.walls.add(Wall(self.rect.x, self.rect.y, C.TOP))
+
+        # 如果单元格的 walls_sign 属性包含 C.BOTTOM 标志
+        # 创建一个 Wall 对象并将其添加到 walls 组中，位于单元格的底部
         if self.walls_sign & C.BOTTOM:
-            self.walls.add(
-                Wall(self.rect.x, self.rect.y+C.BLOCK_SIZE, C.BOTTOM))
+            self.walls.add(Wall(self.rect.x, self.rect.y + C.BLOCK_SIZE, C.BOTTOM))
+
+        # 如果单元格的 walls_sign 属性包含 C.LEFT 标志
+        # 创建一个 Wall 对象并将其添加到 walls 组中，位于单元格的左侧
         if self.walls_sign & C.LEFT:
             self.walls.add(Wall(self.rect.x, self.rect.y, C.LEFT))
+
+        # 如果单元格的 walls_sign 属性包含 C.RIGHT 标志
+        # 创建一个 Wall 对象并将其添加到 walls 组中，位于单元格的右侧
         if self.walls_sign & C.RIGHT:
-            self.walls.add(
-                Wall(self.rect.x+C.BLOCK_SIZE, self.rect.y, C.RIGHT))
+            self.walls.add(Wall(self.rect.x + C.BLOCK_SIZE, self.rect.y, C.RIGHT))
 
     def setup_color(self, x, y):
+        # 创建一个 Surface 对象作为单元格的图像，尺寸为 C.BLOCK_SIZE × C.BLOCK_SIZE
         self.image = pygame.Surface((C.BLOCK_SIZE, C.BLOCK_SIZE)).convert()
-        self.image.fill(C.CELL_COLOR[random.randint(0, 1)])
+        # 使用白色填充单元格的图像
+        self.image.fill(C.CELL_COLOR)
+        # 获取单元格图像的矩形边界
         self.rect = self.image.get_rect()
+        # 将单元格的矩形边界移动到指定的 x 和 y 坐标位置
         self.rect.move_ip(x, y)
 
     def draw_cell(self, surface):

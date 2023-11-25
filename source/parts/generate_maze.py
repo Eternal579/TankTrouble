@@ -6,7 +6,6 @@ from . import cell
 def get_idx(x, y):
     return x+y*C.COLUMN_NUM
 
-
 def predeal(arena):
     for i in range(0, C.COLUMN_NUM*C.ROW_NUM):
         arena.cells.append(cell.Cell(

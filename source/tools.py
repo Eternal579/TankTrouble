@@ -27,14 +27,17 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.display.quit()
                     sys.exit()
-                elif event.type == pygame.KEYDOWN:
+                elif event.type == pygame.KEYDOWN: # 按下
                     self.keys = pygame.key.get_pressed()
-                elif event.type == pygame.KEYUP:
+                elif event.type == pygame.KEYUP: # 松开
                     self.keys = pygame.key.get_pressed()
+                elif self.state == self.state_dict['main_menu']:
+                    for button in self.state.buttons:
+                        button.handle_event(event)
 
             self.update()
-            pygame.display.update()
-            self.clock.tick(C.FRAME_RATE)
+            pygame.display.update() # 将之前绘制的图形更新到屏幕上
+            self.clock.tick(C.FRAME_RATE) # 保证最大不超过C.FRAME_RATE帧
 
 def load_graphics(path):
     graphics = {}
@@ -63,9 +66,9 @@ def create_image(sheet, x, y, width, height, scale):
     return image
 
 # 创建文本图像
-def create_textImg(text, size=40, width_ratio=1.25, height_ratio=1):
+def create_textImg(text, size=40, color=C.BLACK, width_ratio=1.25, height_ratio=1):
     font = pygame.font.SysFont(C.FONT, size)
-    text_image = font.render(text, 1, C.BLACK) # 文本转为图像
+    text_image = font.render(text, 1, color) # 文本转为图像
     rect = text_image.get_rect()
     # 缩放
     text_image = pygame.transform.scale(text_image, (int(rect.width*width_ratio), int(rect.height*height_ratio))) 
