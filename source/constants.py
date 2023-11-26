@@ -1,51 +1,78 @@
 import numpy
 
-SCREEN_W, SCREEN_H = 1280, 720
-SCREEN_SIZE = (SCREEN_W, SCREEN_H)
-SCREEN_COLOR = (230, 230, 230)
-CELL_COLOR = (255, 255, 255)
-WALL_COLOR = (80, 80, 80)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
-PURPLE = (255, 0, 255)
-YELLOW = (255, 255, 0)
-GREEN = (0, 255, 0)
-WHITE = (255, 255, 255)
-GRAY = (130, 130, 130)
-DARK_GRAY = (100, 100, 100)
-FRAME_RATE = 144
-CURSOR_MULTI = 1.5
-PLAYER_MULTI = 1.0
-PLAYER_PX = 41
-PLAYER_PY = 27
-ROUND_PX = 9
-ROUND_PY = 9
-MOTION_CALC_SCALE = 100
-MPX = MOTION_CALC_SCALE*PLAYER_PX
-MPY = MOTION_CALC_SCALE*PLAYER_PY
-ROUND_COLLITION_EPS = 6
-WALL_SIZE = 8
-LOAD_TIME = 1000
-TOP_SPACE = 42
-LEFT_SPACE = 74
-PI = numpy.arccos(-1)
-FONT = 'Fixedsys.ttf'
-PLAYER1_X, PLAYER1_Y = 250, 290
-BASE_ROUND_V = 350.0/FRAME_RATE*60
-BASE_MOVE_V = 255.0/FRAME_RATE*60
-BASE_TURN_W = 1.0/5.8/PI/FRAME_RATE*60
-BACKWARD_V = 0.83*BASE_MOVE_V
-GRAVI_ACC = 4/FRAME_RATE*60
-ENDING_TIME = 3000
-CELEBRATING_TIME = 2000
-SUPPLY_TIME = 10000
-MAX_ROUND_TIME = 11000
-MAX_ROUND_NUM = 15
-FIRE_TICK = 110
-FIRE_COOL_DOWN = 220
-COLUMN_NUM = 12
-ROW_NUM = 6
-BLOCK_SIZE = 94
+# 游戏界面大小
+screen_width, screen_height = 1280, 720
+# 游戏界面颜色
+screen_color = (230, 230, 230)
+
+black = (0, 0, 0)
+white = (255, 255, 255)
+red = (255, 0, 0)
+blue = (0, 0, 255)
+purple = (255, 0, 255)
+yellow = (255, 255, 0)
+green = (0, 255, 0)
+gray = (130, 130, 130)
+dark_gray = (100, 100, 100)
+
+# 帧率
+frame_rate = 60
+
+# 在主界面展示tank的缩放比例
+tank_zoom_rate = 1.5
+# 在游玩的时候展示tank的缩放比例
+play_zoom_rate = 1.0
+# 坦克图片大小
+player_scale_x = 41
+player_scale_y = 27
+# 一列有多少个cell
+cell_column_num = 12
+# 一行有多少个cell
+cell_row_num = 6
+# 一共有多少个cell
+cell_num = 72
+# 一个cell的大小
+cell_size = 94
+# 标识cell处于上下左右
 TOP, BOTTOM, LEFT, RIGHT = 1, 2, 4, 8
-LEVEL, VERTICAL = 0, 1
+# 子弹图片大小
+bullet_pic_size_x = 9
+bullet_pic_size_y = 9
+# 把一个像素看成100个单位
+real_to_virtual = 100
+v_player_scale_x = real_to_virtual*player_scale_x
+v_player_scale_y = real_to_virtual*player_scale_y
+# 用来判断是否与墙体碰撞
+is_collided = 6
+# 墙的宽度
+wall_size = 8
+# 上方空白高度
+top_space = 42
+# 左边空白宽度
+left_space = 74
+PI = numpy.arccos(-1)
+# 字体
+font = 'Fixedsys.ttf'
+# 子弹的基础速度
+bullet_base_v = 350.0/frame_rate*60
+# 前进的基础速度
+tank_base_v = 255.0/frame_rate*60
+# 坦克旋转的角速度
+tank_turn_base_w = 1.0/5.8/PI/frame_rate*60
+# 坦克倒退的速度
+tank_back_v = 0.83*tank_base_v
+# 碎片向下的垂直速度
+g_val = 4/frame_rate*60
+# 判断是否有玩家获胜的间隔时间，单位毫秒
+judge_interval = 3000
+# 庆祝时间
+celebrating_time = 2000
+# 道具生成的间隔时间
+prop_gener_interval = 10000
+# 子弹存在的最大时间
+bullet_max_exist_time = 8000
+# 场上子弹最大存在个数
+bullet_exist_num = 15
+fire_tick = 110
+# 开火间隔时间
+fire_interval = 200

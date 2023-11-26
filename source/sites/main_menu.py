@@ -29,16 +29,18 @@ class MainMenu:
         self.how_tank_look()
         self.choose_player_num()
         self.finished = False
-        self.next = 'arena'
+        self.next = 'battlefield'
         # score数组用于表示玩家得分，-1表示没有此玩家
         self.score = [-1,-1,-1]
 
-    def setup(self, *args):
+    # 加载主界面
+    def load(self, *args):
         self.how_to_play()
         self.how_tank_look()
         self.choose_player_num()
         self.finished = False
-        self.next = 'load_screen'
+        self.next = 'battlefield'
+        self.score = [-1,-1,-1]
 
     def choose_player_num(self):
         two_players = Button((250, 550, 200, 50), (255, 0, 0), "1 V 1")
@@ -49,42 +51,42 @@ class MainMenu:
     def how_to_play(self):
         self.player_methods = []
         self.player_methods.append(
-            (tools.create_textImg('PLAYER 1', 35, color=C.RED), (C.PLAYER1_X, C.PLAYER1_Y)))
+            (tools.create_textImg('PLAYER 1', 35, color=C.red), (250, 290)))
         self.player_methods.append(
-            (tools.create_textImg('WASD FIRE: Q', 35, color=C.RED), (0.15*C.SCREEN_W+C.PLAYER1_X, C.PLAYER1_Y)))
+            (tools.create_textImg('WASD FIRE: Q', 35, color=C.red), (0.15*C.screen_width+250, 290)))
         self.player_methods.append(
-            (tools.create_textImg('PLAYER 2', 35, color=C.GREEN), (C.PLAYER1_X, 0.1*C.SCREEN_H+C.PLAYER1_Y)))
+            (tools.create_textImg('PLAYER 2', 35, color=C.green), (250, 0.1*C.screen_height+290)))
         self.player_methods.append(
-            (tools.create_textImg('IJKL FIRE: U', 35, color=C.GREEN), (0.15*C.SCREEN_W+C.PLAYER1_X, 0.1*C.SCREEN_H+C.PLAYER1_Y)))
+            (tools.create_textImg('IJKL FIRE: U', 35, color=C.green), (0.15*C.screen_width+250, 0.1*C.screen_height+290)))
         self.player_methods.append(
-            (tools.create_textImg('PLAYER 3', 35, color=C.BLUE), (C.PLAYER1_X, 0.2*C.SCREEN_H+C.PLAYER1_Y)))
+            (tools.create_textImg('PLAYER 3', 35, color=C.blue), (250, 0.2*C.screen_height+290)))
         self.player_methods.append(
-            (tools.create_textImg('DIRECT FIRE: DEL', 35, color=C.BLUE), (0.15*C.SCREEN_W+C.PLAYER1_X, 0.2*C.SCREEN_H+C.PLAYER1_Y)))
+            (tools.create_textImg('DIRECT FIRE: DEL', 35, color=C.blue), (0.15*C.screen_width+250, 0.2*C.screen_height+290)))
 
     # 坦克的样子
     def how_tank_look(self):
         self.tank_p1 = pygame.sprite.Sprite()
         self.tank_p1.image = tools.create_image(
-            setup.GRAPHICS['red'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.CURSOR_MULTI)
+            setup.GRAPHICS['red'], 0, 0, C.player_scale_y, C.player_scale_x, C.tank_zoom_rate)
         rect = self.tank_p1.image.get_rect()
-        rect.x, rect.y = (0.57*C.SCREEN_W+C.PLAYER1_X -
-                          rect.w/2, C.PLAYER1_Y-rect.h/2)
+        rect.x, rect.y = (0.57*C.screen_width+250 -
+                          rect.w/2, 290-rect.h/2)
         self.tank_p1.rect = rect
         
         self.tank_p2 = pygame.sprite.Sprite()
         self.tank_p2.image = tools.create_image(
-            setup.GRAPHICS['green'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.CURSOR_MULTI)
+            setup.GRAPHICS['green'], 0, 0, C.player_scale_y, C.player_scale_x, C.tank_zoom_rate)
         rect = self.tank_p2.image.get_rect()
-        rect.x, rect.y = (0.57*C.SCREEN_W+C.PLAYER1_X-rect.w/2,
-                          0.1*C.SCREEN_H+C.PLAYER1_Y-rect.h/2)
+        rect.x, rect.y = (0.57*C.screen_width+250-rect.w/2,
+                          0.1*C.screen_height+290-rect.h/2)
         self.tank_p2.rect = rect
 
         self.tank_p3 = pygame.sprite.Sprite()
         self.tank_p3.image = tools.create_image(
-            setup.GRAPHICS['blue'], 0, 0, C.PLAYER_PY, C.PLAYER_PX, C.CURSOR_MULTI)
+            setup.GRAPHICS['blue'], 0, 0, C.player_scale_y, C.player_scale_x, C.tank_zoom_rate)
         rect = self.tank_p3.image.get_rect()
-        rect.x, rect.y = (0.57*C.SCREEN_W+C.PLAYER1_X-rect.w/2,
-                          0.2*C.SCREEN_H+C.PLAYER1_Y-rect.h/2)
+        rect.x, rect.y = (0.57*C.screen_width+250-rect.w/2,
+                          0.2*C.screen_height+290-rect.h/2)
         self.tank_p3.rect = rect
 
     def show_tanks(self, surface, keys):
@@ -100,7 +102,7 @@ class MainMenu:
                 pixel_color = caption.get_at((x, y))
                 if 100 <= pixel_color[1] and 100 <= pixel_color[2]:
                     caption.set_at((x, y), (255, 255, 255, 0))
-        caption.set_colorkey(C.WHITE)
+        caption.set_colorkey(C.white)
         rect = caption.get_rect()
         rect.x, rect.y = 350, 110
         surface.blit(caption, rect)

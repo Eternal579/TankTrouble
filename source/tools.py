@@ -4,20 +4,21 @@ import os
 from . import constants as C
 
 class Game:
-    def __init__(self, state_dict, start_state):
+    def __init__(self, interface_dict, start_interface):
         self.screen = pygame.display.get_surface()
         self.clock = pygame.time.Clock()
         self.keys = pygame.key.get_pressed()
-        self.state_dict = state_dict
-        self.state = self.state_dict[start_state]
+        self.interface_dict = interface_dict
+        self.state = self.interface_dict[start_interface]
 
     def update(self):
         if self.state.finished:
             player_num = self.state.player_num
+            # 这个score是个数组，指的是玩家的得分
             score = self.state.score
             next_state = self.state.next
-            self.state = self.state_dict[next_state]
-            self.state.setup(player_num, score)
+            self.state = self.interface_dict[next_state]
+            self.state.load(player_num, score)
 
         self.state.update(self.screen, self.keys)
 
@@ -31,13 +32,13 @@ class Game:
                     self.keys = pygame.key.get_pressed()
                 elif event.type == pygame.KEYUP: # 松开
                     self.keys = pygame.key.get_pressed()
-                elif self.state == self.state_dict['main_menu']:
+                elif self.state == self.interface_dict['main_menu']:
                     for button in self.state.buttons:
                         button.handle_event(event)
 
             self.update()
             pygame.display.update() # 将之前绘制的图形更新到屏幕上
-            self.clock.tick(C.FRAME_RATE) # 保证最大不超过C.FRAME_RATE帧
+            self.clock.tick(C.frame_rate) # 保证最大不超过C.FRAME_RATE帧
 
 def load_graphics(path):
     graphics = {}
@@ -61,13 +62,13 @@ def create_image(sheet, x, y, width, height, scale):
     # blit三个参数分别为源图像，目标位置，要复制的图像区域
     image.blit(sheet, (0, 0), (x, y, width, height))
     # 把图片旁边的白色设置为透明
-    image.set_colorkey(C.WHITE)
+    image.set_colorkey(C.white)
     image = pygame.transform.scale(image, (int(width*scale), int(height*scale)))
     return image
 
 # 创建文本图像
-def create_textImg(text, size=40, color=C.BLACK, width_ratio=1.25, height_ratio=1):
-    font = pygame.font.SysFont(C.FONT, size)
+def create_textImg(text, size=40, color=C.black, width_ratio=1.25, height_ratio=1):
+    font = pygame.font.SysFont(C.font, size)
     text_image = font.render(text, 1, color) # 文本转为图像
     rect = text_image.get_rect()
     # 缩放

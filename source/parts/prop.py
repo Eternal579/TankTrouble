@@ -3,7 +3,7 @@ import random
 from .. import setup, tools, constants as C
 
 
-class Supply(pygame.sprite.Sprite):
+class Prop(pygame.sprite.Sprite):
     def __init__(self, center):
         pygame.sprite.Sprite.__init__(self)
         if random.randint(0, 1):

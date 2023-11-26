@@ -5,7 +5,7 @@ from .. import constants as C
 
 
 class Particles(pygame.sprite.Sprite):
-    def __init__(self, num, colors, size, x, y, vec_x, vec_y, arena, vertical):
+    def __init__(self, num, colors, size, x, y, vec_x, vec_y, battlefield, vertical):
         pygame.sprite.Sprite.__init__(self)
         self.particles = pygame.sprite.Group()
         for i in range(num):
@@ -16,8 +16,8 @@ class Particles(pygame.sprite.Sprite):
             if ny < 0:
                 theta *= -1
             self.particles.add(Particle(
-                x, y, theta, random.random()*arena*C.BASE_MOVE_V,
-                random.random()*vertical*C.BASE_MOVE_V, colors[int(random.random()*len(colors))], size+(random.random()-0.5)*4))
+                x, y, theta, random.random()*battlefield*C.tank_base_v,
+                random.random()*vertical*C.tank_base_v, colors[int(random.random()*len(colors))], size+(random.random()-0.5)*4))
 
     def update(self, surface):
         self.particles.update(surface)
@@ -41,13 +41,13 @@ class Particle(pygame.sprite.Sprite):
         self.z += self.vz
         self.v += -0.0002*self.v**2
         sign = self.vz/abs(self.vz)
-        self.vz += -0.0002*self.vz**2*sign - C.GRAVI_ACC
+        self.vz += -0.0002*self.vz**2*sign - C.g_val
 
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.rect.width = self.size
         self.rect.height = self.size
-        self.rect.center = (self.x/C.MOTION_CALC_SCALE,
-                            (self.y-self.z)/C.MOTION_CALC_SCALE)
+        self.rect.center = (self.x/C.real_to_virtual,
+                            (self.y-self.z)/C.real_to_virtual)
         pygame.draw.rect(surface, self.color, self.rect)
 
         if self.z < 0:

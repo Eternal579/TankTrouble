@@ -1,14 +1,13 @@
 from source import tools
-from source.sites import main_menu, arena, load_screen
+from source.sites import main_menu, battlefield
 
 
 def main():
-    state_dict = {
+    interface_dict = {
         'main_menu': main_menu.MainMenu(),
-        #'load_screen': load_screen.LoadScreen(),
-        'arena': arena.Arena()
+        'battlefield': battlefield.Battlefield()
     }
-    game = tools.Game(state_dict, 'main_menu')
+    game = tools.Game(interface_dict, 'main_menu')
     game.run()
 
 if __name__ == '__main__':
