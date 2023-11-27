@@ -15,9 +15,6 @@ green = (0, 255, 0)
 gray = (130, 130, 130)
 dark_gray = (100, 100, 100)
 
-# 帧率
-frame_rate = 60
-
 # 在主界面展示tank的缩放比例
 tank_zoom_rate = 1.5
 # 在游玩的时候展示tank的缩放比例
@@ -38,7 +35,7 @@ TOP, BOTTOM, LEFT, RIGHT = 1, 2, 4, 8
 # 子弹图片大小
 bullet_pic_size_x = 9
 bullet_pic_size_y = 9
-# 把一个像素看成100个单位
+# 由于每一次按下按键，并不只是执行一次，所以需要除以一个数字，在这里把一个像素看成100个单位
 real_to_virtual = 100
 v_player_scale_x = real_to_virtual*player_scale_x
 v_player_scale_y = real_to_virtual*player_scale_y
@@ -54,15 +51,15 @@ PI = numpy.arccos(-1)
 # 字体
 font = 'Fixedsys.ttf'
 # 子弹的基础速度
-bullet_base_v = 350.0/frame_rate*60
+bullet_base_v = 105
 # 前进的基础速度
-tank_base_v = 255.0/frame_rate*60
+tank_base_v = 60
 # 坦克旋转的角速度
-tank_turn_base_w = 1.0/5.8/PI/frame_rate*60
+tank_turn_base_w = 0.05/PI
 # 坦克倒退的速度
 tank_back_v = 0.83*tank_base_v
 # 碎片向下的垂直速度
-g_val = 4/frame_rate*60
+g_val = 4
 # 判断是否有玩家获胜的间隔时间，单位毫秒
 judge_interval = 3000
 # 庆祝时间
@@ -71,8 +68,8 @@ celebrating_time = 2000
 prop_gener_interval = 10000
 # 子弹存在的最大时间
 bullet_max_exist_time = 8000
-# 场上子弹最大存在个数
-bullet_exist_num = 15
-fire_tick = 110
+# 每个坦克子弹最大存在个数
+bullet_exist_num = 5
+fire_state_sustain_time = 110
 # 开火间隔时间
 fire_interval = 200

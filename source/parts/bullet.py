@@ -34,10 +34,10 @@ class Bullet(pygame.sprite.Sprite):
         if self.exist_timer == 0:
             self.exist_timer = self.player.battlefield.clock
 
-        cells_idx = cell.calculate_cell_num(
+        cell_index = cell.calculate_cell_num(
             self.rect.center[0], self.rect.center[1])
         for i in range(0, 4):
-            for wall in self.battlefield.cells[cells_idx[i]].walls:
+            for wall in self.battlefield.cells[cell_index[i]].walls:
                 if pygame.sprite.collide_rect(self, wall):
                     if self.player.battlefield.clock-self.exist_timer >= self.time:
                         self.go_die()
@@ -66,9 +66,9 @@ class Bullet(pygame.sprite.Sprite):
                 continue
             if abs(self.x-aplayer.x)/C.real_to_virtual > C.player_scale_x or abs(self.y-aplayer.y)/C.real_to_virtual > C.player_scale_x:
                 continue
-            hitbox = pygame.sprite.spritecollideany(
-                self, aplayer.hitboxes)
-            if hitbox:
+            collision_v = pygame.sprite.spritecollideany(
+                self, aplayer.collision_v_s)
+            if collision_v:
                 aplayer.go_die()
                 self.go_die()
                 return
@@ -82,7 +82,7 @@ class Bullet(pygame.sprite.Sprite):
         self.update_hit()
 
     def go_die(self):
-        self.player.round_num -= 1
+        self.player.bullet_num -= 1
         self.kill()
 
 
@@ -91,9 +91,9 @@ class Big_Bullet(Bullet):
         Bullet.__init__(self, x, y, theta, s, v, t, battlefield, player)
 
     def go_die(self):
-        setup.SOUNDS['fire'+str(int(random.random()*4+1))].play()
+        setup.SOUNDS['fire'].play()
         for i in range(30):
-            self.player.rounds.add(Fragment(x=self.x, y=self.y, theta=random.random()*2*C.PI,
+            self.player.bullets.add(Fragment(x=self.x, y=self.y, theta=random.random()*2*C.PI,
                                             s=0.7, v=1.5, t=0.05, battlefield=self.battlefield, player=self.player))
         self.kill()
 
@@ -103,10 +103,10 @@ class Big_Bullet(Bullet):
         if self.player.battlefield.clock-self.exist_timer >= self.time:
             self.go_die()
             return
-        cells_idx = cell.calculate_cell_num(
+        cell_index = cell.calculate_cell_num(
             self.rect.center[0], self.rect.center[1])
         for i in range(0, 4):
-            for wall in self.battlefield.cells[cells_idx[i]].walls:
+            for wall in self.battlefield.cells[cell_index[i]].walls:
                 if pygame.sprite.collide_rect(self, wall):
                     if self.last_hit != None and self.last_hit is wall:
                         return
@@ -137,10 +137,10 @@ class Fragment(Bullet):
         if self.player.battlefield.clock-self.exist_timer >= self.time:
             self.go_die()
             return
-        cells_idx = cell.calculate_cell_num(
+        cell_index = cell.calculate_cell_num(
             self.rect.center[0], self.rect.center[1])
         for i in range(0, 4):
-            for wall in self.battlefield.cells[cells_idx[i]].walls:
+            for wall in self.battlefield.cells[cell_index[i]].walls:
                 if pygame.sprite.collide_rect(self, wall):
                     if self.last_hit != None and self.last_hit is wall:
                         return
@@ -165,7 +165,7 @@ class Fragment(Bullet):
 
 def Shot_Gun(x, y, theta, s, v, t, battlefield, player):
     for i in range(20):
-        player.rounds.add(Shot_Gun_Fragment(
+        player.bullets.add(Shot_Gun_Fragment(
             x=x, y=y, theta=theta+(random.random()-0.5)*C.PI/6,
             s=s, v=v, t=t, battlefield=battlefield, player=player))
 

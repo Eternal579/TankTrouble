@@ -15,9 +15,9 @@ class player(pygame.sprite.Sprite):
         self.fire = False
         self.fire_timer = 0
         self.fire_cool_down_timer = 0
-        self.not_stuck = True
+        self.is_stucked = False
         self.moving = False
-        self.stuking_timer = 0
+        self.when_stucked = 0
         self.dead = False
         self.can_fire = True
         self.shotgun = False
@@ -25,39 +25,43 @@ class player(pygame.sprite.Sprite):
         self.random = 0
         self.x = 0
         self.y = 0
+        # 以水平向右为0，顺时针方向为正
         self.theta = 0
-        self.round_num = 0
+        self.bullet_num = 0
         self.exploding = False
         self.bullets = pygame.sprite.Group()
         self.particles = pygame.sprite.Group()
 
-        self.setup_hitboxes()
+        self.init_collision_v_s()
         self.load_material()
 
-    def setup_hitboxes(self):
-        self.hitboxes = pygame.sprite.Group()
-        self.relapositions = []
+    def init_collision_v_s(self):
+        self.collision_v_s = pygame.sprite.Group()
+        self.all_collision_detect_pos = []
         # 以坦克中心为坐标原点，构建极坐标系
-        # 下面的(x,y)表示坦克右下角
+        # 下面的(x,y)表示坦克右下角,坦克大小是41*27
         x = C.player_scale_x * C.play_zoom_rate / 2
         y = -C.player_scale_y * C.play_zoom_rate / 2
         # d仅仅作为一个步长
         d = C.player_scale_x * C.play_zoom_rate / 12
+        # 构建碰撞方块的宽
         for i in range(8):
             r = numpy.sqrt(x**2+y**2)
             alpha = numpy.arccos(x/r)
-            if y < 0:
+            if y < 0: # 顺时针为负
                 alpha = -alpha
-            self.relapositions.append((r, alpha))
-            self.relapositions.append((r, C.PI-alpha))
+            self.all_collision_detect_pos.append((r, alpha))
+            # 加个Π表示关于坐标原点对称的点
+            self.all_collision_detect_pos.append((r, C.PI + alpha))
             y += d
-        x = C.player_scale_x*C.play_zoom_rate/2-3
-        y = C.player_scale_y*C.play_zoom_rate/2-2
+        x = C.player_scale_x*C.play_zoom_rate/2
+        y = C.player_scale_y*C.play_zoom_rate/2
+        # 构建碰撞体积的长
         for i in range(11):
             r = numpy.sqrt(x**2+y**2)
             alpha = numpy.arccos(x/r)
-            self.relapositions.append((r, alpha))
-            self.relapositions.append((r, -alpha))
+            self.all_collision_detect_pos.append((r, alpha))
+            self.all_collision_detect_pos.append((r, C.PI + alpha))
             x += -d
 
     def load_material(self):
@@ -76,18 +80,23 @@ class player(pygame.sprite.Sprite):
                 setup.GRAPHICS['blue'], 0, 0, C.player_scale_y, C.player_scale_x, C.play_zoom_rate)
             self.fire_image = tools.create_image(
                 setup.GRAPHICS['blue_s'], 0, 0, C.player_scale_y, C.player_scale_x, C.play_zoom_rate)
-        self.display_image = self.image
+        self.tank_state_img = self.image
 
     def update(self, keys):
         self.random = self.battlefield.random
         self.bullets.update()
         if not self.dead:
+            # 更新坦克位置
             self.update_position(keys)
+            # 更新完位置后千万不要忘了更新碰撞组
+            self.calculate_collision_v_s()
+            # 更新开火状态
             self.update_fire(keys)
+            # 更新坦克状态图
             self.update_image()
-            self.calculate_hitboxes()
             if self.moving:
-                self.update_collisions()
+                # 检测是否发生碰撞
+                self.detect_collision()
                 self.update_moving_particles()
 
     def prevent_tank_stuck_out_wall(self):
@@ -148,25 +157,25 @@ class player(pygame.sprite.Sprite):
                 if keys[key]:
                     self.moving = True
                     move_speed, angle_adjustment = key_mapping_1[key]
-                    self.x += move_speed * numpy.cos(self.theta) * self.not_stuck
-                    self.y += move_speed * numpy.sin(self.theta) * self.not_stuck
-                    self.theta += angle_adjustment * self.not_stuck
+                    self.x += move_speed * (not self.is_stucked) * numpy.cos(self.theta)
+                    self.y += move_speed * (not self.is_stucked) * numpy.sin(self.theta)
+                    self.theta += (not self.is_stucked) * angle_adjustment
         elif self.id == 2:
             for key in key_mapping_2:
                 if keys[key]:
                     self.moving = True
                     move_speed, angle_adjustment = key_mapping_2[key]
-                    self.x += move_speed * numpy.cos(self.theta) * self.not_stuck
-                    self.y += move_speed * numpy.sin(self.theta) * self.not_stuck
-                    self.theta += angle_adjustment * self.not_stuck
+                    self.x += move_speed * (not self.is_stucked) * numpy.cos(self.theta)
+                    self.y += move_speed * (not self.is_stucked) * numpy.sin(self.theta)
+                    self.theta += (not self.is_stucked) * angle_adjustment
         elif self.id == 3:
             for key in key_mapping_3:
                 if keys[key]:
                     self.moving = True
                     move_speed, angle_adjustment = key_mapping_3[key]
-                    self.x += move_speed * numpy.cos(self.theta) * self.not_stuck
-                    self.y += move_speed * numpy.sin(self.theta) * self.not_stuck
-                    self.theta += angle_adjustment * self.not_stuck
+                    self.x += move_speed * numpy.cos(self.theta) * (not self.is_stucked)
+                    self.y += move_speed * numpy.sin(self.theta) * (not self.is_stucked)
+                    self.theta += angle_adjustment * (not self.is_stucked)
 
         # 确保 self.theta 的值在 0 到 2π 之间
         self.theta = self.theta % (2 * C.PI)
@@ -183,20 +192,19 @@ class player(pygame.sprite.Sprite):
             flag = True
         if self.id == 3 and keys[pygame.K_DELETE]:
             flag = True
-        if flag and self.can_fire and not self.fire:
+        if flag and self.can_fire and not self.fire: 
             # 霰弹枪和大子弹是不算在每次最多5颗子弹之内的
-            if self.round_num < C.bullet_exist_num or self.shotgun or self.biground:
-                self.fire = True
+            if self.bullet_num < C.bullet_exist_num or self.shotgun or self.biground:
+                self.fire = True # 在这里self.fire被设置为true会让坦克进入开枪状态图
                 self.fire_timer = self.battlefield.clock # 不要忘了更新开火时间
 
         if self.fire:
-            self.fire_cool_down_timer = self.battlefield.clock
             self.can_fire = False
-            if self.battlefield.clock - self.fire_timer >= C.fire_tick:
-                setup.SOUNDS['fire'+str(int(self.random*4+1))].play()
+            self.fire_cool_down_timer = self.battlefield.clock
+            if self.battlefield.clock - self.fire_timer >= C.fire_state_sustain_time:
+                setup.SOUNDS['fire'].play()
 
                 if self.shotgun:
-                    setup.SOUNDS['fire'+str(int(self.random*4+1))].play()
                     bullet.Shot_Gun(self.x+0.32*C.v_player_scale_x*numpy.cos(self.theta), self.y + 0.32*C.v_player_scale_y*numpy.sin(
                         self.theta), theta=self.theta, s=0.7, v=1.4, t=0.08, battlefield=self.battlefield, player=self)
                     self.shotgun = False
@@ -211,97 +219,100 @@ class player(pygame.sprite.Sprite):
                                     y=self.y+0.32*C.v_player_scale_y*numpy.sin(self.theta),
                                     theta=self.theta, s=1, v=1, t=1,
                                     battlefield=self.battlefield, player=self))
-                    self.round_num += 1
+                    self.bullet_num += 1
 
-                self.fire = False
+                self.fire = False # 在这里被设置为false，使坦克退出开枪状态
 
     def update_image(self):
+        # 1.5PI的原因是材料图是竖直向上的，所以是1.5PI
+        cur_angle = (1.5 * C.PI - self.theta) / C.PI * 180
         if self.fire:
-            self.display_image = pygame.transform.rotate(
-                self.fire_image, (1.5*C.PI-self.theta)*180/C.PI)
+            self.tank_state_img = pygame.transform.rotate(self.fire_image, cur_angle)
         else:
-            self.display_image = pygame.transform.rotate(
-                self.image, (1.5*C.PI-self.theta)*180/C.PI)
+            self.tank_state_img = pygame.transform.rotate(self.image, cur_angle)
 
-    def calculate_hitboxes(self):
-        self.hitboxes.empty()
-        for pos in self.relapositions:
-            hitbox = pygame.sprite.Sprite()
-            hitbox.image = pygame.Surface(
-                (C.player_scale_x*C.play_zoom_rate/12+2, C.player_scale_x*C.play_zoom_rate/12+2)).convert()
-            hitbox.rect = hitbox.image.get_rect()
-            hitbox.rect.center = (pos[0]*numpy.cos(pos[1]+self.theta) +
-                                  self.x/100, pos[0]*numpy.sin(pos[1]+self.theta)+self.y/100)
-            hitbox.image.fill((0, 0, 0))
-            self.hitboxes.add(hitbox)
+    def calculate_collision_v_s(self):
+        self.collision_v_s.empty()
+        for pos in self.all_collision_detect_pos:
+            collision_v = pygame.sprite.Sprite()
+            collision_v.image = pygame.Surface((C.player_scale_x / 12, C.player_scale_x / 12)).convert()
+            collision_v.rect = collision_v.image.get_rect()
+            # 不要忘记加上self.theta
+            collision_v.rect.center = (pos[0] * numpy.cos(pos[1] + self.theta) + self.x / C.real_to_virtual, pos[0] * numpy.sin(pos[1] + self.theta) + self.y / C.real_to_virtual)
+            self.collision_v_s.add(collision_v)
 
-    def update_collisions(self):
-        self.not_stuck = True
-        cells_idx = cell.calculate_cell_num(
-            self.x/C.real_to_virtual, self.y/C.real_to_virtual)
-        for acell in cells_idx:
-            for wall in self.battlefield.cells[acell].walls:
-                hitbox = pygame.sprite.spritecollideany(
-                    wall, self.hitboxes)
-                if hitbox:
-                    self.not_stuck = False
-                    self.adjust_position(hitbox, 0.1, True)
+    def detect_collision(self):
+        # 获取坦克现在所在位置的cell下标
+        cell_index = cell.calculate_cell_num(self.x / C.real_to_virtual, self.y / C.real_to_virtual)
+        self.is_stucked = False
+        # 处理坦克与墙之间的碰撞
+        for i in cell_index:
+            # 遍历这个cell的所有墙
+            for wall in self.battlefield.cells[i].walls:
+                # 如果碰撞到墙，则让is_stucked为True，这样坦克就无法移动
+                # which_collision_v表示哪个小矩形碰到了
+                which_collision_v = pygame.sprite.spritecollideany(wall, self.collision_v_s)
+                if which_collision_v:
+                    #print(which_collision_v.rect)
+                    self.is_stucked = True
+                    # 调节位置后坦克便可移动
+                    self.adjust_position(which_collision_v, 0.1, True)
                     return
+        
+        self.when_stucked = self.battlefield.clock
 
-        self.stuking_timer = self.battlefield.clock
+        # # 处理坦克与坦克之间的碰撞
+        # for player in self.battlefield.players:
+        #     if player is self:
+        #         continue
+        #     if abs(player.x-self.x)/C.real_to_virtual > C.player_scale_x or abs(player.y-self.y)/C.real_to_virtual > C.player_scale_x:
+        #         continue
+        #     for self_hitbox in self.collision_v_s:
+        #         collision_v = pygame.sprite.spritecollideany(
+        #             self_hitbox, player.collision_v_s)
+        #         if collision_v:
+        #             self.is_stucked = True
+        #             self.adjust_position(collision_v, 1, False)
+        #             return
 
-        for player in self.battlefield.players:
-            if player is self:
-                continue
-            if abs(player.x-self.x)/C.real_to_virtual > C.player_scale_x or abs(player.y-self.y)/C.real_to_virtual > C.player_scale_x:
-                continue
-            for self_hitbox in self.hitboxes:
-                hitbox = pygame.sprite.spritecollideany(
-                    self_hitbox, player.hitboxes)
-                if hitbox:
-                    self.not_stuck = False
-                    self.adjust_position(hitbox, 1, False)
-                    return
-
-    def adjust_position(self, hitbox, k, time_matters):
-        x = hitbox.rect.center[0] - \
-            self.x/C.real_to_virtual
-        y = hitbox.rect.center[1] - \
-            self.y/C.real_to_virtual
-        alpha = numpy.arccos(x/numpy.sqrt(x**2+y**2))
+    def adjust_position(self, collision_v, k, time_matters):
+        x = collision_v.rect.center[0] - self.x / C.real_to_virtual
+        y = collision_v.rect.center[1] - self.y / C.real_to_virtual
+        alpha = numpy.arccos(x / numpy.sqrt(x**2 + y**2))
+        # y < 0表示向上撞得
         if y < 0:
             alpha = -alpha
 
         if (time_matters):
-            self.x -= numpy.cos(alpha-self.theta)*min((self.battlefield.clock-self.stuking_timer), 10)*k * \
+            self.x -= numpy.cos(alpha-self.theta)*min((self.battlefield.clock-self.when_stucked), 10)*k * \
                 C.real_to_virtual * \
                 numpy.cos(self.theta) + (self.random-0.5) * \
-                (self.battlefield.clock-self.stuking_timer)
-            self.y -= numpy.cos(alpha-self.theta)*min(0.1*(self.battlefield.clock-self.stuking_timer), 10)*k * \
+                (self.battlefield.clock-self.when_stucked)
+            self.y -= numpy.cos(alpha-self.theta)*min(0.1*(self.battlefield.clock-self.when_stucked), 10)*k * \
                 C.real_to_virtual * \
                 numpy.sin(self.theta) + (random.random()-0.5) * \
-                (self.battlefield.clock-self.stuking_timer)
-            self.x -= numpy.sin(alpha-self.theta) * min((self.battlefield.clock-self.stuking_timer), 100)*k * \
+                (self.battlefield.clock-self.when_stucked)
+            self.x -= numpy.sin(alpha-self.theta) * min((self.battlefield.clock-self.when_stucked), 100)*k * \
                 C.real_to_virtual*-numpy.sin(self.theta)
-            self.y -= numpy.sin(alpha-self.theta) * min((self.battlefield.clock-self.stuking_timer), 100)*k * \
+            self.y -= numpy.sin(alpha-self.theta) * min((self.battlefield.clock-self.when_stucked), 100)*k * \
                 C.real_to_virtual*numpy.cos(self.theta)
         else:
             self.x -= numpy.cos(alpha-self.theta)*k * \
                 C.real_to_virtual * \
                 numpy.cos(self.theta) + (self.random-0.5) * \
-                (self.battlefield.clock-self.stuking_timer)
+                (self.battlefield.clock-self.when_stucked)
             self.y -= numpy.cos(alpha-self.theta)*k * \
                 C.real_to_virtual * \
                 numpy.sin(self.theta) + (random.random()-0.5) * \
-                (self.battlefield.clock-self.stuking_timer)
+                (self.battlefield.clock-self.when_stucked)
             self.x -= numpy.sin(alpha-self.theta) * k * \
                 C.real_to_virtual*-numpy.sin(self.theta)
             self.y -= numpy.sin(alpha-self.theta) * k * \
                 C.real_to_virtual*numpy.cos(self.theta)
 
     def go_die(self):
-        setup.SOUNDS['explosion'+str(int(self.random*6+1))].play()
-        self.hitboxes.empty()
+        setup.SOUNDS['explosion'].play()
+        self.collision_v_s.empty()
 
         self.dead = True
         self.battlefield.rest_player_num -= 1
@@ -319,7 +330,7 @@ class player(pygame.sprite.Sprite):
         self.exploding = True
 
     def update_moving_particles(self):
-        if not self.not_stuck and random.randint(1, 2) == 1:
+        if self.is_stucked and random.randint(1, 2) == 1:
             sign = int(self.random+0.5)*2-1
             self.particles.add(particles.Particles(
                 1, (C.gray, C.dark_gray, C.black), 6, (self.x+sign*0.4*C.player_scale_y*C.real_to_virtual*numpy.sin(self.theta))-0.4*C.player_scale_x*C.real_to_virtual*numpy.cos(
@@ -334,7 +345,7 @@ class player(pygame.sprite.Sprite):
                 -numpy.cos(self.theta), -numpy.sin(self.theta), 0.8, 0.8))
 
     def celebrate(self):
-        setup.SOUNDS['fire'+str(int(self.random*4+1))].play()
+        setup.SOUNDS['fire'].play()
         self.particles.add(particles.Particles(
             20, (C.purple, C.red, C.yellow), 6, self.x+0.32*C.player_scale_x*C.real_to_virtual*numpy.cos(
                 self.theta), self.y+0.32*C.player_scale_x*C.real_to_virtual*numpy.sin(self.theta),
@@ -342,7 +353,7 @@ class player(pygame.sprite.Sprite):
 
     def draw(self, surface):
         if not self.dead:
-            surface.blit(self.display_image, self.display_image.get_rect(
+            surface.blit(self.tank_state_img, self.tank_state_img.get_rect(
                 center=(self.x/C.real_to_virtual, self.y/C.real_to_virtual)))
         self.bullets.draw(surface)
         self.particles.update(surface)

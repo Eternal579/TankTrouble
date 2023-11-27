@@ -38,7 +38,6 @@ class Game:
 
             self.update()
             pygame.display.update() # 将之前绘制的图形更新到屏幕上
-            self.clock.tick(C.frame_rate) # 保证最大不超过C.FRAME_RATE帧
 
 def load_graphics(path):
     graphics = {}

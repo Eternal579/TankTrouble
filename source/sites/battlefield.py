@@ -134,7 +134,7 @@ class Battlefield:
         # 检测道具是否被捡到
         for single_prop in self.props:
             for player in self.players:
-                is_obtain = pygame.sprite.spritecollide(single_prop, player.hitboxes, False)
+                is_obtain = pygame.sprite.spritecollide(single_prop, player.collision_v_s, False)
                 if is_obtain:
                     self.prop_num -= 1
                     self.last_prop_gen_time = self.clock
