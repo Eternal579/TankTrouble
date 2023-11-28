@@ -55,7 +55,7 @@ bullet_base_v = 105
 # 前进的基础速度
 tank_base_v = 60
 # 坦克旋转的角速度
-tank_turn_base_w = 0.05/PI
+tank_turn_base_w = 0.041/PI
 # 坦克倒退的速度
 tank_back_v = 0.83*tank_base_v
 # 碎片向下的垂直速度
