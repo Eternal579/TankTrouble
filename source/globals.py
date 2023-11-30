@@ -35,6 +35,9 @@ TOP, BOTTOM, LEFT, RIGHT = 1, 2, 4, 8
 # 子弹图片大小
 bullet_pic_size_x = 9
 bullet_pic_size_y = 9
+# 激光图片大小
+laser_pic_size_x = 19
+laser_pic_size_y = 45
 # 由于每一次按下按键，并不只是执行一次，所以需要除以一个数字，在这里把一个像素看成100个单位
 real_to_virtual = 100
 v_player_scale_x = real_to_virtual*player_scale_x
@@ -53,7 +56,7 @@ font = 'Fixedsys.ttf'
 # 子弹的基础速度
 bullet_base_v = 105
 # 前进的基础速度
-tank_base_v = 60
+tank_base_v = 70
 # 坦克旋转的角速度
 tank_turn_base_w = 0.041/PI
 # 坦克倒退的速度

@@ -1,7 +1,7 @@
 import pygame
 import random
-from ..parts import player, cell, generate_maze, prop
-from .. import tools, setup, constants as C
+import player, utils, generate_maze, prop
+import globals as G
 
 
 class Battlefield:
@@ -32,15 +32,15 @@ class Battlefield:
 
     def load_map(self):
         self.cells = []  
-        self.map = pygame.Surface((C.screen_width, C.screen_height)).convert()  
-        self.map.fill(C.screen_color)  
+        self.map = pygame.Surface((G.screen_width, G.screen_height)).convert()  
+        self.map.fill(G.screen_color)  
 
         # 地图由多个cells组成，先生成需要的cells
         generate_maze.build_cells(self)  
         # 调用 generate_maze 模块的 Generage_Maze 函数生成迷宫
-        generate_maze.create_maze(self, 0, 0, C.cell_column_num-1, C.cell_row_num-1)  
+        generate_maze.create_maze(self, 0, 0, G.cell_column_num-1, G.cell_row_num-1)  
         # 遍历地图中的每个单元格，调用其 draw_walls 方法在地图表面上绘制墙壁
-        for i in range(0, C.cell_column_num*C.cell_row_num):
+        for i in range(0, G.cell_column_num*G.cell_row_num):
             self.cells[i].draw_walls(self.map)  
 
     def distribute_players_pos(self):
@@ -52,17 +52,17 @@ class Battlefield:
         for i in range(3):
             if self.score[i] != -1:
                 single_player = player.player(i+1, self)
-                x = random.randint(0, C.cell_column_num - 1)
-                y = random.randint(0, C.cell_row_num - 1)
+                x = random.randint(0, G.cell_column_num - 1)
+                y = random.randint(0, G.cell_row_num - 1)
                 # 如果随机到的位置已经被其他玩家占用
                 while cell_is_used.get(generate_maze.get_idx(x, y), False):
-                    x = random.randint(0, C.cell_column_num - 1)
-                    y = random.randint(0, C.cell_row_num - 1)
+                    x = random.randint(0, G.cell_column_num - 1)
+                    y = random.randint(0, G.cell_row_num - 1)
                 cell_is_used[generate_maze.get_idx(x, y)] = True
-                single_player.theta = 2*C.PI*random.random()
+                single_player.theta = 2*G.PI*random.random()
                 # 游戏中的位置是以地图为参照系的，所以要乘上C.real_to_virtual
-                single_player.x = self.cells[generate_maze.get_idx(x, y)].rect.centerx * C.real_to_virtual
-                single_player.y = self.cells[generate_maze.get_idx(x, y)].rect.centery * C.real_to_virtual
+                single_player.x = self.cells[generate_maze.get_idx(x, y)].rect.centerx * G.real_to_virtual
+                single_player.y = self.cells[generate_maze.get_idx(x, y)].rect.centery * G.real_to_virtual
                 self.players.add(single_player)
 
     def update(self, surface, keys):
@@ -93,40 +93,34 @@ class Battlefield:
         self.props.draw(surface)
 
     def draw_info(self, surface):
-        surface.blit(tools.create_textImg('ESC  /  P', 28),
-                     (C.screen_width*0.11, C.screen_height*0.9))
-        if self.pause:
-            surface.blit(tools.create_textImg('pause...', 28),
-                         (C.screen_width*0.215, C.screen_height*0.9))
-        
         self.draw_player_score(surface)
 
     def draw_player_score(self, surface):
         if self.score[0] != -1:
-            surface.blit(tools.create_textImg('PLAYER1', 32, C.red),
-                         (C.screen_width*0.33, C.screen_height*0.9))
-            surface.blit(tools.create_textImg(str(self.score[0]), 32, C.red),
-                         (C.screen_width*0.46, C.screen_height*0.9))
+            surface.blit(utils.create_textImg('PLAYER1', 32, G.red),
+                         (G.screen_width*0.33, G.screen_height*0.9))
+            surface.blit(utils.create_textImg(str(self.score[0]), 32, G.red),
+                         (G.screen_width*0.46, G.screen_height*0.9))
         if self.score[1] != -1:
-            surface.blit(tools.create_textImg('PLAYER2', 32, C.green),
-                         (C.screen_width*0.53, C.screen_height*0.9))
-            surface.blit(tools.create_textImg(str(self.score[1]), 32, C.green),
-                         (C.screen_width*0.66, C.screen_height*0.9))
+            surface.blit(utils.create_textImg('PLAYER2', 32, G.green),
+                         (G.screen_width*0.53, G.screen_height*0.9))
+            surface.blit(utils.create_textImg(str(self.score[1]), 32, G.green),
+                         (G.screen_width*0.66, G.screen_height*0.9))
         if self.score[2] != -1:
-            surface.blit(tools.create_textImg('PLAYER3', 32, C.blue),
-                         (C.screen_width*0.73, C.screen_height*0.9))
-            surface.blit(tools.create_textImg(str(self.score[2]), 32, C.blue),
-                         (C.screen_width*0.86, C.screen_height*0.9))
+            surface.blit(utils.create_textImg('PLAYER3', 32, G.blue),
+                         (G.screen_width*0.73, G.screen_height*0.9))
+            surface.blit(utils.create_textImg(str(self.score[2]), 32, G.blue),
+                         (G.screen_width*0.86, G.screen_height*0.9))
 
     def update_prop(self):
         # 先初始化一下last_prop_gen_time
         if self.last_prop_gen_time == 0:
             self.last_prop_gen_time = self.clock
         # 如果大于时间间隔并且场上的道具数小于2
-        elif self.clock-self.last_prop_gen_time > C.prop_gener_interval and self.prop_num < 2:
-            new_id = random.randint(0, C.cell_column_num * C.cell_row_num - 1)
+        elif self.clock-self.last_prop_gen_time > G.prop_gener_interval and self.prop_num < 2:
+            new_id = random.randint(0, G.cell_column_num * G.cell_row_num - 1)
             while new_id == self.last_prop_id:
-                new_id = int(random.random()*C.cell_column_num*C.cell_row_num)
+                new_id = int(random.random()*G.cell_column_num*G.cell_row_num)
             self.last_prop_id = new_id
             self.props.add(prop.Prop(self.cells[new_id].rect.center))
             self.last_prop_gen_time = self.clock
@@ -138,14 +132,20 @@ class Battlefield:
                 if is_obtain:
                     self.prop_num -= 1
                     self.last_prop_gen_time = self.clock
-                    setup.SOUNDS['pick'].play()
+                    utils.audios['pick'].play()
                     single_prop.kill()
-                    if single_prop.type: # 为0表示霰弹
+                    if single_prop.type == 0:
                         player.shotgun = True
-                        player.biground = False
-                    else: # 为1表示大子弹
-                        player.biground = True
+                        player.bigbullet = False
+                        player.laser = False
+                    elif single_prop.type == 1: 
+                        player.bigbullet = True
                         player.shotgun = False
+                        player.laser = False
+                    elif single_prop.type == 2:
+                        player.shotgun = False
+                        player.bigbullet = False
+                        player.laser = True
                     return
 
     def update_ending(self):
@@ -153,15 +153,12 @@ class Battlefield:
             self.ending = True
             self.end_time = self.clock
         # 过了C.judge_interval（三秒）后，若还有坦克存活则庆祝
-        if self.ending and self.clock - self.end_time >= C.judge_interval:
+        if self.ending and self.clock - self.end_time >= G.judge_interval:
             self.ending = False
             self.winning = True
             self.winning_time = self.clock
-            for single_player in self.players:
-                if not single_player.dead:
-                    single_player.celebrate()
         # 过了C.celebrating_time（两秒）后，开始更新得分
-        if self.winning and self.clock - self.winning_time >= C.celebrating_time:
+        if self.winning and self.clock - self.winning_time >= G.celebrating_time:
             for single_player in self.players:
                 if not single_player.dead:
                     self.score = tuple(score + (single_player.id-1 == idx) for idx, score in enumerate(self.score))

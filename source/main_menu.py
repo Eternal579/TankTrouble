@@ -1,6 +1,5 @@
 import pygame
-import sys
-from .. import setup, tools, constants as C
+import utils, globals as G
 
 class Button:
     def __init__(self, rect, color, text):
@@ -51,42 +50,44 @@ class MainMenu:
     def how_to_play(self):
         self.player_methods = []
         self.player_methods.append(
-            (tools.create_textImg('PLAYER 1', 35, color=C.red), (250, 290)))
+            (utils.create_textImg('PLAYER 1', 35, color=G.red), (250, 290)))
         self.player_methods.append(
-            (tools.create_textImg('WASD FIRE: Q', 35, color=C.red), (0.15*C.screen_width+250, 290)))
+            (utils.create_textImg('WASD FIRE: Q', 35, color=G.red), (0.15*G.screen_width+250, 290)))
         self.player_methods.append(
-            (tools.create_textImg('PLAYER 2', 35, color=C.green), (250, 0.1*C.screen_height+290)))
+            (utils.create_textImg('PLAYER 2', 35, color=G.green), (250, 0.1*G.screen_height+290)))
         self.player_methods.append(
-            (tools.create_textImg('IJKL FIRE: U', 35, color=C.green), (0.15*C.screen_width+250, 0.1*C.screen_height+290)))
+            (utils.create_textImg('IJKL FIRE: U', 35, color=G.green), (0.15*G.screen_width+250, 0.1*G.screen_height+290)))
         self.player_methods.append(
-            (tools.create_textImg('PLAYER 3', 35, color=C.blue), (250, 0.2*C.screen_height+290)))
+            (utils.create_textImg('PLAYER 3', 35, color=G.blue), (250, 0.2*G.screen_height+290)))
         self.player_methods.append(
-            (tools.create_textImg('DIRECT FIRE: DEL', 35, color=C.blue), (0.15*C.screen_width+250, 0.2*C.screen_height+290)))
+            (utils.create_textImg('DIRECT FIRE: DEL', 35, color=G.blue), (0.15*G.screen_width+250, 0.2*G.screen_height+290)))
+        self.player_methods.append(
+            (utils.create_textImg('ESC FOR EXIT  P FOR PAUSE', 35, color=G.white), (0.15*G.screen_width+250, 0.3*G.screen_height+290)))
 
     # 坦克的样子
     def how_tank_look(self):
         self.tank_p1 = pygame.sprite.Sprite()
-        self.tank_p1.image = tools.create_image(
-            setup.GRAPHICS['red'], 0, 0, C.player_scale_y, C.player_scale_x, C.tank_zoom_rate)
+        self.tank_p1.image = utils.create_image(
+            utils.pics['red'], 0, 0, G.player_scale_y, G.player_scale_x, G.tank_zoom_rate)
         rect = self.tank_p1.image.get_rect()
-        rect.x, rect.y = (0.57*C.screen_width+250 -
+        rect.x, rect.y = (0.57*G.screen_width+250 -
                           rect.w/2, 290-rect.h/2)
         self.tank_p1.rect = rect
         
         self.tank_p2 = pygame.sprite.Sprite()
-        self.tank_p2.image = tools.create_image(
-            setup.GRAPHICS['green'], 0, 0, C.player_scale_y, C.player_scale_x, C.tank_zoom_rate)
+        self.tank_p2.image = utils.create_image(
+            utils.pics['green'], 0, 0, G.player_scale_y, G.player_scale_x, G.tank_zoom_rate)
         rect = self.tank_p2.image.get_rect()
-        rect.x, rect.y = (0.57*C.screen_width+250-rect.w/2,
-                          0.1*C.screen_height+290-rect.h/2)
+        rect.x, rect.y = (0.57*G.screen_width+250-rect.w/2,
+                          0.1*G.screen_height+290-rect.h/2)
         self.tank_p2.rect = rect
 
         self.tank_p3 = pygame.sprite.Sprite()
-        self.tank_p3.image = tools.create_image(
-            setup.GRAPHICS['blue'], 0, 0, C.player_scale_y, C.player_scale_x, C.tank_zoom_rate)
+        self.tank_p3.image = utils.create_image(
+            utils.pics['blue'], 0, 0, G.player_scale_y, G.player_scale_x, G.tank_zoom_rate)
         rect = self.tank_p3.image.get_rect()
-        rect.x, rect.y = (0.57*C.screen_width+250-rect.w/2,
-                          0.2*C.screen_height+290-rect.h/2)
+        rect.x, rect.y = (0.57*G.screen_width+250-rect.w/2,
+                          0.2*G.screen_height+290-rect.h/2)
         self.tank_p3.rect = rect
 
     def show_tanks(self, surface, keys):
@@ -96,20 +97,21 @@ class MainMenu:
 
     def show_caption(self, surface):
         caption = pygame.Surface((629, 71))
-        caption.blit(setup.GRAPHICS['caption'], (0, 0), (0, 0, 629, 71))
+        caption.blit(utils.pics['caption'], (0, 0), (0, 0, 629, 71))
         for y in range(caption.get_height()):
             for x in range(caption.get_width()):
                 pixel_color = caption.get_at((x, y))
                 if 100 <= pixel_color[1] and 100 <= pixel_color[2]:
                     caption.set_at((x, y), (255, 255, 255, 0))
-        caption.set_colorkey(C.white)
+        caption.set_colorkey(G.white)
         rect = caption.get_rect()
         rect.x, rect.y = 350, 110
         surface.blit(caption, rect)
 
     def update(self, surface, keys):
-        surface.blit(
-            pygame.transform.scale(setup.GRAPHICS['background'], (surface.get_width(), surface.get_height())), (0,0))
+        # 为主界面画出背景图
+        surface.blit(pygame.transform.scale(utils.pics['background'],
+                    (surface.get_width(), surface.get_height())), (0,0))
         # 展示游戏标题
         self.show_caption(surface)
         # 展示玩法

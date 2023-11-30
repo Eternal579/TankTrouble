@@ -1,39 +1,43 @@
 import pygame
 import numpy
 import random
-from .. import setup, tools, constants as C
-from . import cell, bullet
+import utils, cell, globals as G
 
 
 class Bullet(pygame.sprite.Sprite):
-    # theta表示子弹初始角度，s表示子弹大小，v：速度，time_rate：表示存活时间的rate，battlefiled用于拿到上个状态的一些变量，player表示发射子弹的玩家
+    # theta表示子弹初始角度，s表示子弹大小，v：速度，time_rate：表示存活时间的rate
+    # battlefiled用于拿到上个状态的一些变量，player表示发射子弹的玩家
     def __init__(self, x, y, theta, s, v, time_rate, battlefield, player):
         pygame.sprite.Sprite.__init__(self)
         self.x = x
         self.y = y
         self.theta = theta
         # x轴方向速度分量
-        self.vx = v*C.bullet_base_v*numpy.cos(self.theta)
-        self.vy = v*C.bullet_base_v*numpy.sin(self.theta)
-        self.max_exist_time = time_rate*C.bullet_max_exist_time
+        self.vx = v*G.bullet_base_v*numpy.cos(self.theta)
+        self.vy = v*G.bullet_base_v*numpy.sin(self.theta)
+        # 子弹最大存活时间
+        self.max_exist_time = time_rate*G.bullet_max_exist_time
+        # 发射时间
         self.launch_time = 0
-        # 防止炸膛
+        # 防止子弹刚发射的一帧后就被判定为与坦克碰撞，导致产生“炸膛”的效果
         self.protection = True
+        # 子弹上次碰到的墙体，同样是由于多帧问题被认为重复碰撞，
         self.last_wall = None
+        # 子弹大小
         self.size = s
         self.battlefield = battlefield
         self.player = player
         self.load_image()
 
     def load_image(self):
-        self.image = tools.create_image(setup.GRAPHICS['bullet'], 0, 0, C.bullet_pic_size_x, C.bullet_pic_size_y, self.size)
+        self.image = utils.create_image(utils.pics['bullet'], 0, 0, G.bullet_pic_size_x, G.bullet_pic_size_y, self.size)
         self.rect = self.image.get_rect()
-        self.rect.center = (self.x / C.real_to_virtual, self.y / C.real_to_virtual)
+        self.rect.center = (self.x / G.real_to_virtual, self.y / G.real_to_virtual)
 
     def update(self):
         self.x += self.vx
         self.y += self.vy
-        self.rect.center = (self.x / C.real_to_virtual, self.y / C.real_to_virtual)
+        self.rect.center = (self.x / G.real_to_virtual, self.y / G.real_to_virtual)
         self.detect_collisions()
         self.update_hit()
 
@@ -59,13 +63,13 @@ class Bullet(pygame.sprite.Sprite):
                     self.last_wall = wall
                     self.protection = False
                     # 撞到上或下了
-                    if abs(wall.rect.top - self.rect.bottom) <= C.is_collided and self.vy > 0 or \
-                       abs(wall.rect.bottom-self.rect.top) <= C.is_collided and self.vy < 0:
+                    if abs(wall.rect.top - self.rect.bottom) <= G.is_collided and self.vy > 0 or \
+                       abs(wall.rect.bottom-self.rect.top) <= G.is_collided and self.vy < 0:
                         self.vy *= -1
                         return
                     # 撞到左或右了
-                    if abs(wall.rect.right-self.rect.left) <= C.is_collided and self.vx < 0 or \
-                       abs(wall.rect.left-self.rect.right) <= C.is_collided and self.vx > 0:
+                    if abs(wall.rect.right-self.rect.left) <= G.is_collided and self.vx < 0 or \
+                       abs(wall.rect.left-self.rect.right) <= G.is_collided and self.vx > 0:
                         self.vx *= -1
                         return
 
@@ -90,5 +94,26 @@ class Big_Bullet(Bullet):
 
 def Shot_Gun(x, y, theta, s, v, time_rate, battlefield, player):
     for i in range(20):
-        player.bullets.add(Bullet(x=x, y=y, theta=theta+(random.random()-0.5)*C.PI/6,
+        player.bullets.add(Bullet(x=x, y=y, theta=theta+(random.random()-0.5)*G.PI/6,
             s=s, v=v, time_rate=time_rate, battlefield=battlefield, player=player))
+        
+class Laser(Bullet):
+    def __init__(self, x, y, theta, s, v, time_rate, battlefield, player):
+        Bullet.__init__(self, x, y, theta, s, v, time_rate, battlefield, player)
+
+    def load_image(self):
+        cur_angle = (1.5 * G.PI - self.player.theta) / G.PI * 180
+        if self.player.id == 1:
+            color = 'red_laser'
+        elif self.player.id == 2:
+            color = 'green_laser'
+        elif self.player.id == 3:
+            color = 'blue_laser'
+        self.image = utils.create_image(utils.pics[color], 0, 0, G.laser_pic_size_x, G.laser_pic_size_y, self.size)
+        self.image = pygame.transform.rotate(self.image, cur_angle)
+        self.rect = self.image.get_rect()
+        self.rect.center = (self.x / G.real_to_virtual, self.y / G.real_to_virtual)
+
+    def detect_collisions(self):
+        if self.launch_time == 0:
+            self.launch_time = self.player.battlefield.clock
